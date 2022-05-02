@@ -1,5 +1,14 @@
 #include "header.h"
 
+// semaphore constants
+#define SEMAPHORE_HYDROGEN "semaphore_hydrogen"
+#define SEMAPHORE_OXYGEN "semaphore_oxygen"
+#define SEMAPHORE_OUTPUT "semaphore_output"
+#define SEMAPHORE_READY "semaphore_ready"
+#define SEMAPHORE_CREATE "semaphore_create"
+#define SEMAPHORE_STOP_EXTRA "semaphore_stop_extra"
+#define SEMAPHORE_CREATING "semaphore_creating"
+
 #define init(name,value)(sem_open(name, O_CREAT | O_WRONLY, 0666, value))
 
 void sem_create(semaphores* sem)

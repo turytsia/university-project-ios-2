@@ -41,8 +41,6 @@ typedef struct
     uint EXPECTED_O;
 } args;
 
-int read_args(args *, int, char **);
-
 typedef struct
 {
     id_t id;
@@ -56,12 +54,6 @@ typedef struct
     uint extra;
 } process_t;
 
-//
-#define IPC_KEY 90
-
-#define IPC_ALLOCATE(key, type) (shmget(key, sizeof(type), 0666 | IPC_CREAT))
-#define IPC_AT(segment_id) (shmat(segment_id, NULL, 0))
-
 typedef struct
 {
     uint line_n;
@@ -71,22 +63,6 @@ typedef struct
     id_t molecule_id;
     key_t shmid;
 } ipc_t;
-
-//
-
-// semaphore constants
-#define SEMAPHORE_HYDROGEN "semaphore_hydrogen"
-#define SEMAPHORE_OXYGEN "semaphore_oxygen"
-#define SEMAPHORE_OUTPUT "semaphore_output"
-#define SEMAPHORE_READY "semaphore_ready"
-#define SEMAPHORE_CREATE "semaphore_create"
-#define SEMAPHORE_STOP_EXTRA "semaphore_stop_extra"
-#define SEMAPHORE_CREATING "semaphore_creating"
-#define SEM_FLAGS O_CREAT | O_WRONLY
-
-#define SEM_INIT(name, value) (sem_open(name, SEM_FLAGS, 0666, value))
-#define SEM_DESTROY(sem, name) \
-    sem_close(sem);
 
 typedef struct
 {
@@ -98,6 +74,12 @@ typedef struct
     sem_t*sem_creating;
     sem_t*sem_stop_extra;
 } semaphores;
+
+int read_args(args *, int, char **);
+
+process_t fork_many(uint n, const char type);
+
+void msg(const int action_id, process_t *process, ipc_t *ipc);
 
 void sem_create(semaphores* sem);
 
