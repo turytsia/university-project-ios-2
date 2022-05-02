@@ -48,14 +48,14 @@ int read_args(args *arguments, int argc, char **argv)
             {
                 return EXIT_FAILURE;
             }
-            arguments->TI = arg_value * 1000;
+            arguments->TI = arg_value;
             break;
         case 4:
             if (arg_value > 1000)
             {
                 return EXIT_FAILURE;
             }
-            arguments->TB = arg_value * 1000;
+            arguments->TB = arg_value;
             break;
         }
     }

@@ -54,10 +54,7 @@ int main(int argc, char **argv)
 
         sem_post(sem.sem_output);
 
-        if (arguments.TI > 0)
-        {
-            usleep(RANDOM_INTERVAL(arguments.TI));
-        }
+        usleep(arguments.TI > 0 ? RANDOM_INTERVAL(arguments.TI) * 1000 : 0);
 
         sem_wait(sem.sem_output);
 
@@ -114,11 +111,6 @@ int main(int argc, char **argv)
 
             sem_wait(sem.sem_creating);
 
-            if (arguments.TB > 0)
-            {
-                usleep(RANDOM_INTERVAL(arguments.TB));
-            }
-
             sem_wait(sem.sem_output);
 
             msg(ATOM_DONE, &process, ipc);
@@ -148,12 +140,9 @@ int main(int argc, char **argv)
 
             sem_post(sem.sem_hydrogen);
 
-            sem_wait(sem.sem_creating);
+            usleep(arguments.TB > 0 ? RANDOM_INTERVAL(arguments.TB) * 1000 : 0);
 
-            if (arguments.TB > 0)
-            {
-                usleep(RANDOM_INTERVAL(arguments.TB));
-            }
+            sem_wait(sem.sem_creating);
 
             sem_wait(sem.sem_output);
 
@@ -180,8 +169,7 @@ int main(int argc, char **argv)
     while (wait(NULL) > 0)
         ;
 
-
-    //cleanup
+    // cleanup
 
     sem_cleanup(&sem);
 
