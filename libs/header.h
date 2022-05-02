@@ -69,6 +69,7 @@ typedef struct
     uint oxygen_n;
     uint molecule_counter_h;
     id_t molecule_id;
+    key_t shmid;
 } ipc_t;
 
 //
@@ -86,3 +87,22 @@ typedef struct
 #define SEM_INIT(name, value) (sem_open(name, SEM_FLAGS, 0666, value))
 #define SEM_DESTROY(sem, name) \
     sem_close(sem);
+
+typedef struct
+{
+    sem_t *sem_hydrogen;
+    sem_t *sem_oxygen; 
+    sem_t*sem_output; 
+    sem_t *sem_ready; 
+    sem_t*sem_created; 
+    sem_t*sem_creating;
+    sem_t*sem_stop_extra;
+} semaphores;
+
+void sem_create(semaphores* sem);
+
+void sem_cleanup(semaphores*sem);
+
+ipc_t* ipc_init();
+
+void ipc_destroy(ipc_t* ipc);
