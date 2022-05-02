@@ -2,8 +2,10 @@
 
 #define ARGS_COUNT 5
 
+//checks if character is a num
 #define is_num(n) (n >= '0' && n <= '9')
 
+//reads arguments from the command line
 int read_args(args *arguments, int argc, char **argv)
 {
 

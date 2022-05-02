@@ -11,6 +11,7 @@
 
 #define init(name,value)(sem_open(name, O_CREAT | O_WRONLY, 0666, value))
 
+//Creates all the semaphores we need
 void sem_create(semaphores* sem)
 {
     if ((sem->sem_hydrogen = init(SEMAPHORE_HYDROGEN,0)) == SEM_FAILED){
@@ -69,6 +70,7 @@ void sem_create(semaphores* sem)
     sem_unlink(SEMAPHORE_STOP_EXTRA);
 }
 
+//destroyes all the semaphores
 void sem_cleanup(semaphores*sem){
 
     sem_close(sem->sem_hydrogen);

@@ -1,5 +1,6 @@
 #include "header.h"
 
+//error handler
 void err(int err_id){
     if(err_id == 0){
         return;

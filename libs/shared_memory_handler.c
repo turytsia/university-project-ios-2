@@ -2,6 +2,7 @@
 
 #define FILE_KEY "main.c" 
 
+//creates shared memory
 ipc_t* ipc_init(){
 
     key_t key = ftok(FILE_KEY,'c');
@@ -15,6 +16,7 @@ ipc_t* ipc_init(){
     return ipc;
 }
 
+//destroyes shared memory
 void ipc_destroy(ipc_t*ipc){
 
     key_t key = ipc->shmid;
