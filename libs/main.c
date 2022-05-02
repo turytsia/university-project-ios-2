@@ -19,34 +19,11 @@ int main(int argc, char **argv)
 
     // creates shared memory
 
-    int ipc_key = shmget(93274, sizeof(ipc_t), 0666 | IPC_CREAT); //IPC_ALLOCATE(IPC_KEY, ipc_t);
+    key_t shmid = ftok("main.c",'c');
+
+    int ipc_key = shmget(shmid, sizeof(ipc_t), 0666 | IPC_CREAT); //IPC_ALLOCATE(IPC_KEY, ipc_t);
 
     ipc_t *ipc = shmat(ipc_key, NULL, 0);
-
-    // ipc->hydrogen_n = 0;
-
-    // ipc->line_n = 0;
-
-    // ipc->molecule_counter_h = 0;
-
-    // ipc->molecule_id = 0;
-
-    // ipc->oxygen_n = 0;
-
-    // creates semaphores
-    sem_unlink(SEMAPHORE_HYDROGEN);
-
-    sem_unlink(SEMAPHORE_OXYGEN);
-
-    sem_unlink(SEMAPHORE_OUTPUT);
-
-    sem_unlink(SEMAPHORE_READY);
-
-    sem_unlink(SEMAPHORE_CREATE);
-
-    sem_unlink(SEMAPHORE_CREATING);
-
-    sem_unlink(SEMAPHORE_STOP_EXTRA);
 
     sem_t *sem_hydrogen,*sem_oxygen,*sem_output,*sem_ready,*sem_created,*sem_creating,*sem_stop_extra;
 
@@ -85,6 +62,21 @@ int main(int argc, char **argv)
         perror("sem_open");
         exit(EXIT_FAILURE);
     }
+
+    // creates semaphores
+    sem_unlink(SEMAPHORE_HYDROGEN);
+
+    sem_unlink(SEMAPHORE_OXYGEN);
+
+    sem_unlink(SEMAPHORE_OUTPUT);
+
+    sem_unlink(SEMAPHORE_READY);
+
+    sem_unlink(SEMAPHORE_CREATE);
+
+    sem_unlink(SEMAPHORE_CREATING);
+
+    sem_unlink(SEMAPHORE_STOP_EXTRA);
 
     if (arguments.EXPECTED_H == 0 && arguments.EXPECTED_O == 0)
     {
