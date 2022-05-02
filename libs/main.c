@@ -2,6 +2,8 @@
 
 int main(int argc, char **argv)
 {
+    remove(FILE_NAME);
+
     args arguments;
 
     process_t process;
