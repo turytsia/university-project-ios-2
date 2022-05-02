@@ -19,24 +19,72 @@ int main(int argc, char **argv)
 
     // creates shared memory
 
-    int ipc_key = IPC_ALLOCATE(IPC_KEY, ipc_t);
+    int ipc_key = shmget(93274, sizeof(ipc_t), 0666 | IPC_CREAT); //IPC_ALLOCATE(IPC_KEY, ipc_t);
 
-    ipc_t *ipc = IPC_AT(ipc_key);
+    ipc_t *ipc = shmat(ipc_key, NULL, 0);
+
+    // ipc->hydrogen_n = 0;
+
+    // ipc->line_n = 0;
+
+    // ipc->molecule_counter_h = 0;
+
+    // ipc->molecule_id = 0;
+
+    // ipc->oxygen_n = 0;
 
     // creates semaphores
-    sem_t *sem_hydrogen = SEM_INIT(SEMAPHORE_HYDROGEN, 0);
+    sem_unlink(SEMAPHORE_HYDROGEN);
 
-    sem_t *sem_oxygen = SEM_INIT(SEMAPHORE_OXYGEN, 1);
+    sem_unlink(SEMAPHORE_OXYGEN);
 
-    sem_t *sem_output = SEM_INIT(SEMAPHORE_OUTPUT, 1);
+    sem_unlink(SEMAPHORE_OUTPUT);
 
-    sem_t *sem_ready = SEM_INIT(SEMAPHORE_READY, 0);
+    sem_unlink(SEMAPHORE_READY);
 
-    sem_t *sem_created = SEM_INIT(SEMAPHORE_CREATE, 0);
+    sem_unlink(SEMAPHORE_CREATE);
 
-    sem_t *sem_creating = SEM_INIT(SEMAPHORE_CREATING, 0);
+    sem_unlink(SEMAPHORE_CREATING);
 
-    sem_t *sem_stop_extra = SEM_INIT(SEMAPHORE_STOP_EXTRA, 0);
+    sem_unlink(SEMAPHORE_STOP_EXTRA);
+
+    sem_t *sem_hydrogen,*sem_oxygen,*sem_output,*sem_ready,*sem_created,*sem_creating,*sem_stop_extra;
+
+
+    if((sem_hydrogen = sem_open(SEMAPHORE_HYDROGEN, O_CREAT | O_WRONLY, 0666, 0)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
+    if((sem_oxygen = sem_open(SEMAPHORE_OXYGEN, O_CREAT | O_WRONLY, 0666, 1)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
+    if((sem_output = sem_open(SEMAPHORE_OUTPUT, O_CREAT | O_WRONLY, 0666, 1)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
+    if((sem_ready = sem_open(SEMAPHORE_READY, O_CREAT | O_WRONLY, 0666, 0)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
+    if((sem_created = sem_open(SEMAPHORE_CREATE, O_CREAT | O_WRONLY, 0666, 0)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
+    if((sem_creating = sem_open(SEMAPHORE_CREATING, O_CREAT | O_WRONLY, 0666, 0)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
+    if((sem_stop_extra = sem_open(SEMAPHORE_STOP_EXTRA, O_CREAT | O_WRONLY, 0666, 0)) == SEM_FAILED){
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
 
     if (arguments.EXPECTED_H == 0 && arguments.EXPECTED_O == 0)
     {
@@ -134,6 +182,8 @@ int main(int argc, char **argv)
             --ipc->molecule_counter_h;
 
             sem_post(sem_ready);
+
+            exit(0);
         }
         else if (process.atom.type == O_t)
         {
@@ -169,6 +219,8 @@ int main(int argc, char **argv)
             }
 
             sem_post(sem_oxygen);
+
+            exit(0);
         }
     }
 
@@ -176,27 +228,28 @@ int main(int argc, char **argv)
     while (wait(NULL) > 0)
         ;
 
+    // destroyes semaphores
+
+    sem_close(sem_hydrogen);
+
+    sem_close(sem_oxygen);
+
+    sem_close(sem_output);
+
+    sem_close(sem_ready);
+
+    sem_close(sem_created);
+
+    sem_close(sem_creating);
+
+    sem_close(sem_stop_extra);
+
     // destroyes shared memory
 
     shmdt(ipc);
 
     shmctl(ipc_key, IPC_RMID, NULL);
 
-    // destroyes semaphores
-
-    SEM_DESTROY(sem_hydrogen, SEMAPHORE_HYDROGEN);
-
-    SEM_DESTROY(sem_oxygen, SEMAPHORE_OXYGEN);
-
-    SEM_DESTROY(sem_output, SEMAPHORE_OUTPUT);
-
-    SEM_DESTROY(sem_ready, SEMAPHORE_READY);
-
-    SEM_DESTROY(sem_created, SEMAPHORE_CREATE);
-
-    SEM_DESTROY(sem_creating, SEMAPHORE_CREATING);
-
-    SEM_DESTROY(sem_stop_extra, SEMAPHORE_STOP_EXTRA);
 
     return EXIT_SUCCESS;
 }
@@ -221,22 +274,22 @@ void msg(const int action_id, process_t *process, ipc_t *ipc)
     switch (action_id)
     {
     case ATOM_CREATED:
-        fprintf(output, "%d: %c %d: started\n", ipc->line_n, process->atom.type, process->atom.id);
+        fprintf(output, "%u: %c %u: started\n", ipc->line_n, process->atom.type, process->atom.id);
         break;
     case ATOM_QUEUED:
-        fprintf(output, "%d: %c %d: going to queue\n", ipc->line_n, process->atom.type, process->atom.id);
+        fprintf(output, "%u: %c %u: going to queue\n", ipc->line_n, process->atom.type, process->atom.id);
         break;
     case ATOM_DEQUEUED:
-        fprintf(output, "%d: %c %d: creating molecule %d\n", ipc->line_n, process->atom.type, process->atom.id, ipc->molecule_id);
+        fprintf(output, "%u: %c %u: creating molecule %u\n", ipc->line_n, process->atom.type, process->atom.id, ipc->molecule_id);
         break;
     case ATOM_DONE:
-        fprintf(output, "%d: %c %d: molecule %d created\n", ipc->line_n, process->atom.type, process->atom.id, ipc->molecule_id);
+        fprintf(output, "%u: %c %u: molecule %u created\n", ipc->line_n, process->atom.type, process->atom.id, ipc->molecule_id);
         break;
     case ATOM_LACK_H:
-        fprintf(output, "%d: %c %d: not enough O or H\n", ipc->line_n, process->atom.type, process->atom.id);
+        fprintf(output, "%u: %c %u: not enough O or H\n", ipc->line_n, process->atom.type, process->atom.id);
         break;
     case ATOM_LACK_O:
-        fprintf(output, "%d: %c %d: not enough H\n", ipc->line_n, process->atom.type, process->atom.id);
+        fprintf(output, "%u: %c %u: not enough H\n", ipc->line_n, process->atom.type, process->atom.id);
         break;
     default:
         break;
